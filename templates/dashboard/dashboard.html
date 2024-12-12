@@ -1,0 +1,141 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Dashboard</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/static/css/main.css" rel="stylesheet" />
+    <link href="/static/css/dashboard.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-dark navbar-expand-md fixed-top shadow">
+      <a class="navbar-brand" href="{% url 'debt_savings_calculator' %}">
+        Expenses
+      </a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#sidebarMenu"
+        aria-controls="sidebarMenu"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <ul class="navbar-nav px-3 ml-auto">
+        <li class="nav-item text-nowrap">
+          <span class="nav-link">
+            ({{ request.user.username }})
+          </span>
+        </li>
+        <li class="nav-item text-nowrap">
+          <form action="/authentication/logout" method="POST" class="form-inline">
+            {% csrf_token %}
+            <button class="btn btn-link nav-link" type="submit">Sign out</button>
+          </form>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        {% include 'partials/_sidebar.html' %}
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+          <div class="container">
+            <h1 class="mt-4">Dashboard</h1>
+
+            <!-- Filter Dropdown -->
+            <div class="row mb-4">
+              <div class="col-md-4">
+                <form method="GET" id="filterForm">
+                  <label for="dateRange">Filter by Date:</label>
+                  <select name="date_range" id="dateRange" class="form-control">
+                    <option value="this_month" {% if selected_range == 'this_month' %}selected{% endif %}>This Month</option>
+                    <option value="last_month" {% if selected_range == 'last_month' %}selected{% endif %}>Last Month</option>
+                    <option value="last_30_days" {% if selected_range == 'last_30_days' %}selected{% endif %}>Last 30 Days</option>
+                  </select>
+                </form>
+              </div>
+            </div>
+
+            <!-- Dashboard Cards -->
+            <div class="row">
+              <div class="col-md-4">
+                <div class="card text-white bg-primary mb-3">
+                  <div class="card-header">Total Income</div>
+                  <div class="card-body">
+                    <h5 class="card-title">£{{ total_income }}</h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card text-white bg-danger mb-3">
+                  <div class="card-header">Total Expenses</div>
+                  <div class="card-body">
+                    <h5 class="card-title">£{{ total_expenses }}</h5>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card text-white bg-success mb-3">
+                  <div class="card-header">Carryover</div>
+                  <div class="card-body">
+                    <h5 class="card-title">£{{ carryover }}</h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dynamic Charts -->
+            <div class="row mt-4">
+              <div class="col-md-6">
+                <canvas id="incomeExpensesChart"></canvas>
+              </div>
+              <div class="col-md-6">
+                <canvas id="categoryBreakdownChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <script>
+        const totalIncome = {{ total_income|default:0|floatformat:2 }};
+        const totalExpenses = {{ total_expenses|default:0|floatformat:2 }};
+        const categories = {{ categories|default:"[]"|safe }};
+        const categoryTotals = {{ category_totals|default:"[]"|safe }};
+    </script>
+    
+    <script>
+        try {
+            // Ensure parsed JSON is valid
+            const parsedCategories = JSON.parse('{{ categories|safe|escapejs }}');
+            const parsedCategoryTotals = JSON.parse('{{ category_totals|safe|escapejs }}');
+    
+            console.log("Categories: ", parsedCategories);
+            console.log("Category Totals: ", parsedCategoryTotals);
+        } catch (error) {
+            console.error("Error parsing JSON data: ", error);
+        }
+    </script>
+    
+    
+    
+    
+    
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.9.0/feather.min.js"></script>
+    <script src="/static/js/main.js"></script>
+  </body>
+</html>
